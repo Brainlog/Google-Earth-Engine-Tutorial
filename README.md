@@ -8,10 +8,10 @@ It is recommended to look at the working before moving to the Practice. The tuto
 Let's Learn.
 
 ## Set Up
-![Image Alt Text](repo.png)
+![Image Alt Text](repo.jpg)
 This image shows all the repositories of different users at lab. Set your own repo by clicking on new button. 
 The right side of the page contains console and tasks tab. 
-![Image Alt Text](console.png)
+![Image Alt Text](console.jpg)
 When you run your code, you can look at the output on console tab. To look at the tasks, you can click on tasks tab.
 
 
