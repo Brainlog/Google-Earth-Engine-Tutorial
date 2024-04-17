@@ -34,10 +34,16 @@ Let's now see, how we can use Earth Engine at its fullest :
 5. To manipuate large Collections in a distributed fashion, GEE provides methods like map and reduce. 
 
 ### Map Method For ImageCollection
-This method takes as input an Image Collection and a custom function which should act on each element of Image Collection.      
-When we run this method on any Image Collection, Earth Engine Master Server will perform this computation on its own server and no dataflow would take place between your browser and master server.        
-Now, we also have to write a function which should be passed as input for this Map method.      
+Abstractly, map is a higher-order function that applies a given function to each element of a collection. This definition inherently allows the computation to be done in distributed way. Most of the computations which would done in lab will involve this method to be executed.
+
+This method takes as input an Image Collection and a custom function which should act on each element of Image Collection.   
+
+When we run this method on any Image Collection, Earth Engine Master Server will perform this computation on its own server and no dataflow would take place between your browser and master server. Also, the server(master) will distribute the images between its remote machines to apply custom function on each image. Each remote machine after executing function on image, return new image which will be sent back to Master server.      
+
+Now, we also have to write a function which should be passed as input for this Map method.   
+
 What should this function do? It should manipulate the Image (base object of Image Collection). 
+
 ```
 var manipulate_base_object = function(base_object){
     return base_object.divide(255);
@@ -89,7 +95,92 @@ var exported = manipulated_collection.map(export);
 
 Now, this part of computation will be sent to Batch computation server. Batch Mode is optimized to perform computations on very large input data.   
 
-GEE will make a task out of this computation. You would be able to look at this task in tasks tab.      
+GEE will make a task out of this computation. You would be able to look at this task in tasks tab.   
+
+### Note 
+1. All the objects in Earth Engine are immutable. This means that you can't change the data of object once you have created it. To us, it is relevant in the sense that every method shoud return the new object. Therefore you can never run a method in this fashion : 
+
+```
+collection.map(custom_function)
+```
+
+This is because collection is already constructed. You can't just transform this specific object. You need to use a new object to use the transformed Image Collection. So we use :         
+```
+var new_collection = collection.map(custom_function);
+```
+
+2. All the objects of GEE acts as container. When you print any object, it will only print the meta data of that object. GEE does this to reduce unnecessary dataflow traffic. If you need any data explicitly, you should use :        
+
+```
+print(image.getInfo());
+```
+
+Although, this is not recommended.      
+
+### Important To Remember       
+Sometimes we forget that objects of GEE can only be manipulated by the methods of that object otherwise can result in inaccurate results or slow execution.         
+
+For eg.,        
+You have a Earth Engine Feature Collection object(Feature Collection objects are collection where keys are feature object. You can consider each feature object as a dictionary in itself which can be used to store many arbitrary attributes. We explain the creation of features after this discussion).
+
+
+Each Feature Object contain a single attribute which shows the timestamped year on which it was added to the database. Now, you want to filter out all the features into a new collection with features added after 2022. 
+
+For this purpose, we can use the 'filter' method on Feature Collection which filters the features with a certain attrbiute in a distributed fashion.  
+
+Let us assume that each timestamp is a number. Therefore to filter out, you write the code :        
+
+```
+var filtered_collection = collection.filter('timestamp'>2022);
+```
+
+Will it work?  
+No, This is because, the type of value stored as a timestamp is not a javascript number. So, you can write expressions as shown in above code.          
+
+This timestamped year is actually a ee.Number object. Hence to perform any calculation related to this, we need to write :      
+
+```
+var filtered_collection = collection.filter('timestamp'.gteq(2022));
+```
+
+You can check the Earth Engine docs to look at all the methods it provide for ee.Number class.  
+
+
+### Filter Method : 
+This method is derived method of Map function i.e., It is possible to make our own filter method just by using Map method (Think about it).     
+GEE provides some inbuilt Filters like FilterDate method that uses the range of date to filter out the images which were stamped with time between the range. All these methods are also derived methods.       
+
+
+### Reduce Method :         
+A reduction operation is a function that reduces a dataset to a smaller set, usually a single item.      
+
+How this operation can be useful?      
+
+Suppose you are given a task to analyse the temperature of a state. You want to look at the average temperature of this state across all the months in a year.  So you need to perform a reduce operation on an Image collection where each image represents the pixelwise temperature of that state for a particular day. This operation should output a single image that represents pixelwise average temperature across the year for that state.        
+
+The custom function which represents the way you want to reduce this ImageCollection (In our case this custom function would be to take average) is called Reducer.         
+
+Typically, GEE provides some default Reducers. In most of the cases, its sufficient to use these Reducers except somecases where you can define custom Reducers like we had defined our custom Mappers.  
+
+The code for the reduce task, we discussed looks like:      
+
+```
+var temperatureCollection = ee.ImageCollection("NASA/GLDAS/V021/NOAH/G025/T3H").filterBounds(yourRegion) .filterDate('YEAR_START', 'YEAR_END');
+var reducer = ee.Reducer.mean();
+var averageTemperature = temperatureCollection.reduce(reducer);
+```
+
+Here you use the GEE provided reducer 'mean'.
+
+
+## Recommendation
+Most of us before using GEE, implements the algorithm in most intuitive programming way. But while programming using GEE, it is recommended to implement your program using Map Reduce operations (or thier derived methods) to increase the performance.
+
+We look at some particular objects in next part.        
+
+
+
+
 
 
 
