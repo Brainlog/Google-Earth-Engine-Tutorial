@@ -1,5 +1,0 @@
-1. Google Earth Engine is a distributed computing Engine with Integrated Database.     
-2. It stores around Petabytes of data which is related to many climatic and landscape variables. Any computation which is performed on this data is also called Geocomputing.  
-3. Just a quick overview of distributed engine : Distributed engines can speed up your computation (if used correctly). These engines on backend divide your computation among thousands of remote machines. In case of Google these machines are own by Google itself. After each remote machine perform their respective computation, they return the final output to Google master server. (Master server refers to the device which is handling the disitribution of compuation among all the remote machines).    
-4. Earth Engine also has a large database which could be used to load images which are related to your analysis.    
-5. It is important to write the code in such a way that can instruct the Master server to distribute your code across its remote machines. We can't directly use for loops to perform expensive computations. You will have to explicitly use the APIs of Google Earth Engine to serve this purpose.
