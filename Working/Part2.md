@@ -68,6 +68,28 @@ var manipulated_collection = collection.map(manipulate_base_object);
 print(manipulated_collection.first());
 ```
 
+As we can see that we are only printing first image after transformation. When we click on run button, GEE will only execute the computation on first image and saves the time and resources.       
+
+So, How to save the Image Collection after transformation?      
+GEE refers to these computations as Batch Computation. Batch Computation is performed after you complete your debugging. To use batch computation, you need to explicitly instruct the GEE to run this part of computation in Batch mode.       
+
+To perform this batch computation, we add the following line in our script :        
+```
+ee.Export.image.toDrive('drivepath');
+```
+
+You need to call this function on each image. Therefore, we can use map to call this.   
+```
+var export = function(image){
+    ee.Export.image.toDrive('drivepath');
+    return image;
+}
+var exported = manipulated_collection.map(export);
+```
+
+Now, this part of computation will be sent to Batch computation server. Batch Mode is optimized to perform computations on very large input data.   
+
+GEE will make a task out of this computation. You would be able to look at this task in tasks tab.      
 
 
 
