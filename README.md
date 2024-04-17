@@ -244,5 +244,5 @@ GEE provides some special feature that are used very frequently. The first one w
 
 # Practice
 You can now try out some small tasks to get started with GEE. 
-
+1. Choose an Image COllection from Earth Engine Catalogs. Analyse the structure of that Image Collection.
 
